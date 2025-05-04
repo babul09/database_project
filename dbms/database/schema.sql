@@ -14,12 +14,15 @@ CREATE TABLE Employee (
     EmployeeID INT PRIMARY KEY,
     FirstName VARCHAR(50),
     LastName VARCHAR(50),
-    DateOfBirth DATE,
+    BirthDate DATE,
     Gender VARCHAR(10),
+    HireDate DATE,
     Email VARCHAR(100),
     PhoneNo VARCHAR(15),
     DepartmentID INT,
     SupervisorID INT,
+    Salary DECIMAL(15,2),
+    Address VARCHAR(200),
     FOREIGN KEY (SupervisorID) REFERENCES Employee(EmployeeID)
 );
 
@@ -143,30 +146,30 @@ INSERT INTO Department (DepartmentID, DepartmentName, Location, Budget) VALUES
 (8, 'Sales', 'Building B, Floor 2', 3500000);
 
 -- Employees
-INSERT INTO Employee (EmployeeID, FirstName, LastName, DateOfBirth, Gender, Email, PhoneNo, DepartmentID, SupervisorID) VALUES 
-(1001, 'John', 'Doe', '1985-05-15', 'Male', 'john.doe@company.com', '555-123-4567', 1, NULL),
-(1002, 'Jane', 'Smith', '1990-08-21', 'Female', 'jane.smith@company.com', '555-234-5678', 2, 1001),
-(1003, 'Michael', 'Johnson', '1988-04-12', 'Male', 'michael.johnson@company.com', '555-345-6789', 1, 1001),
-(1004, 'Emily', 'Williams', '1992-11-30', 'Female', 'emily.williams@company.com', '555-456-7890', 3, 1001),
-(1005, 'David', 'Brown', '1987-07-08', 'Male', 'david.brown@company.com', '555-567-8901', 4, 1001),
-(1006, 'Sarah', 'Miller', '1991-03-17', 'Female', 'sarah.miller@company.com', '555-678-9012', 1, 1003),
-(1007, 'Robert', 'Anderson', '1986-09-22', 'Male', 'robert.anderson@company.com', '555-789-0123', 5, 1001),
-(1008, 'Jennifer', 'Thomas', '1993-01-05', 'Female', 'jennifer.thomas@company.com', '555-890-1234', 2, 1002),
-(1009, 'William', 'Jackson', '1989-12-14', 'Male', 'william.jackson@company.com', '555-901-2345', 6, 1001),
-(1010, 'Elizabeth', 'White', '1990-06-25', 'Female', 'elizabeth.white@company.com', '555-012-3456', 7, 1001),
-(1011, 'Christopher', 'Harris', '1988-02-28', 'Male', 'christopher.harris@company.com', '555-123-4567', 1, 1003),
-(1012, 'Amanda', 'Martin', '1991-10-11', 'Female', 'amanda.martin@company.com', '555-234-5678', 2, 1002),
-(1013, 'Daniel', 'Thompson', '1987-08-04', 'Male', 'daniel.thompson@company.com', '555-345-6789', 3, 1004),
-(1014, 'Jessica', 'Garcia', '1992-05-19', 'Female', 'jessica.garcia@company.com', '555-456-7890', 4, 1005),
-(1015, 'Matthew', 'Martinez', '1986-11-02', 'Male', 'matthew.martinez@company.com', '555-567-8901', 5, 1007),
-(1016, 'Megan', 'Robinson', '1993-04-08', 'Female', 'megan.robinson@company.com', '555-678-9012', 6, 1009),
-(1017, 'Andrew', 'Clark', '1989-07-16', 'Male', 'andrew.clark@company.com', '555-789-0123', 7, 1010),
-(1018, 'Lauren', 'Rodriguez', '1990-12-29', 'Female', 'lauren.rodriguez@company.com', '555-890-1234', 8, 1001),
-(1019, 'James', 'Lewis', '1988-06-07', 'Male', 'james.lewis@company.com', '555-901-2345', 8, 1018),
-(1020, 'Ashley', 'Lee', '1991-01-23', 'Female', 'ashley.lee@company.com', '555-012-3456', 1, 1003),
-(1021, 'Babul', 'Rahman', '1989-03-15', 'Male', 'babul.rahman@company.com', '555-111-2222', 1, 1001),
-(1022, 'Lora', 'Piterson', '1990-07-18', 'Female', 'lora.piterson@company.com', '555-111-3333', 2, 1002),
-(1023, 'Nixtio', 'Admin', '1985-01-01', 'Male', 'admin@crextio.com', '555-000-0000', 3, NULL);
+INSERT INTO Employee (EmployeeID, FirstName, LastName, BirthDate, Gender, HireDate, Email, PhoneNo, DepartmentID, SupervisorID, Salary, Address) VALUES 
+(1001, 'John', 'Doe', '1985-05-15', 'Male', '2023-01-01', 'john.doe@company.com', '555-123-4567', 1, NULL, 100000, '123 Main St'),
+(1002, 'Jane', 'Smith', '1990-08-21', 'Female', '2023-02-01', 'jane.smith@company.com', '555-234-5678', 2, 1001, 90000, '456 Elm St'),
+(1003, 'Michael', 'Johnson', '1988-04-12', 'Male', '2023-03-01', 'michael.johnson@company.com', '555-345-6789', 1, 1001, 100000, '789 Oak St'),
+(1004, 'Emily', 'Williams', '1992-11-30', 'Female', '2023-04-01', 'emily.williams@company.com', '555-456-7890', 3, 1001, 95000, '101 Pine St'),
+(1005, 'David', 'Brown', '1987-07-08', 'Male', '2023-05-01', 'david.brown@company.com', '555-567-8901', 4, 1001, 100000, '202 Maple St'),
+(1006, 'Sarah', 'Miller', '1991-03-17', 'Female', '2023-06-01', 'sarah.miller@company.com', '555-678-9012', 1, 1003, 90000, '303 Birch St'),
+(1007, 'Robert', 'Anderson', '1986-09-22', 'Male', '2023-07-01', 'robert.anderson@company.com', '555-789-0123', 5, 1001, 100000, '404 Cedar St'),
+(1008, 'Jennifer', 'Thomas', '1993-01-05', 'Female', '2023-08-01', 'jennifer.thomas@company.com', '555-890-1234', 2, 1002, 95000, '505 Walnut St'),
+(1009, 'William', 'Jackson', '1989-12-14', 'Male', '2023-09-01', 'william.jackson@company.com', '555-901-2345', 6, 1001, 100000, '606 Chestnut St'),
+(1010, 'Elizabeth', 'White', '1990-06-25', 'Female', '2023-10-01', 'elizabeth.white@company.com', '555-012-3456', 7, 1001, 95000, '707 Hickory St'),
+(1011, 'Christopher', 'Harris', '1988-02-28', 'Male', '2023-11-01', 'christopher.harris@company.com', '555-123-4567', 1, 1003, 100000, '808 Beech St'),
+(1012, 'Amanda', 'Martin', '1991-10-11', 'Female', '2023-12-01', 'amanda.martin@company.com', '555-234-5678', 2, 1002, 90000, '909 Maple St'),
+(1013, 'Daniel', 'Thompson', '1987-08-04', 'Male', '2023-01-01', 'daniel.thompson@company.com', '555-345-6789', 3, 1004, 100000, '1010 Oak St'),
+(1014, 'Jessica', 'Garcia', '1992-05-19', 'Female', '2023-02-01', 'jessica.garcia@company.com', '555-456-7890', 4, 1005, 95000, '1111 Pine St'),
+(1015, 'Matthew', 'Martinez', '1986-11-02', 'Male', '2023-03-01', 'matthew.martinez@company.com', '555-567-8901', 5, 1007, 100000, '1212 Elm St'),
+(1016, 'Megan', 'Robinson', '1993-04-08', 'Female', '2023-04-01', 'megan.robinson@company.com', '555-678-9012', 6, 1009, 95000, '1313 Birch St'),
+(1017, 'Andrew', 'Clark', '1989-07-16', 'Male', '2023-05-01', 'andrew.clark@company.com', '555-789-0123', 7, 1010, 100000, '1414 Cedar St'),
+(1018, 'Lauren', 'Rodriguez', '1990-12-29', 'Female', '2023-06-01', 'lauren.rodriguez@company.com', '555-890-1234', 8, 1001, 95000, '1515 Walnut St'),
+(1019, 'James', 'Lewis', '1988-06-07', 'Male', '2023-07-01', 'james.lewis@company.com', '555-901-2345', 8, 1018, 100000, '1616 Chestnut St'),
+(1020, 'Ashley', 'Lee', '1991-01-23', 'Female', '2023-08-01', 'ashley.lee@company.com', '555-012-3456', 1, 1003, 95000, '1717 Hickory St'),
+(1021, 'Babul', 'Rahman', '1989-03-15', 'Male', '2023-09-01', 'babul.rahman@company.com', '555-111-2222', 1, 1001, 100000, '1818 Beech St'),
+(1022, 'Lora', 'Piterson', '1990-07-18', 'Female', '2023-10-01', 'lora.piterson@company.com', '555-111-3333', 2, 1002, 95000, '1919 Maple St'),
+(1023, 'Nixtio', 'Admin', '1985-01-01', 'Male', '2023-11-01', 'admin@crextio.com', '555-000-0000', 3, NULL, 100000, '2020 Oak St');
 
 -- Projects
 INSERT INTO Project (ProjectID, ProjectName, StartDate, EndDate, Budget, Status) VALUES 

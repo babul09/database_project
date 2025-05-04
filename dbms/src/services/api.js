@@ -18,6 +18,9 @@ export const services = {
   // Employees
   getAllEmployees: () => apiClient.get('/employees'),
   getEmployeeById: (id) => apiClient.get(`/employees/${id}`),
+  createEmployee: (employeeData) => apiClient.post('/employees', employeeData),
+  updateEmployee: (id, employeeData) => apiClient.put(`/employees/${id}`, employeeData),
+  deleteEmployee: (id) => apiClient.delete(`/employees/${id}`),
   
   // Departments
   getAllDepartments: () => apiClient.get('/departments'),

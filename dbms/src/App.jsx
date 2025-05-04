@@ -7,6 +7,7 @@ import Dashboard from './components/dashboard/Dashboard';
 // Employees
 import EmployeeList from './components/employees/EmployeeList';
 import EmployeeDetail from './components/employees/EmployeeDetail';
+import EmployeeForm from './components/employees/EmployeeForm';
 
 // Departments
 import DepartmentList from './components/departments/DepartmentList';
@@ -24,7 +25,9 @@ function App() {
           
           {/* Employees */}
           <Route path="/employees" element={<EmployeeList />} />
+          <Route path="/employees/new" element={<EmployeeForm />} />
           <Route path="/employees/:id" element={<EmployeeDetail />} />
+          <Route path="/employees/:id/edit" element={<EmployeeForm />} />
           
           {/* Departments */}
           <Route path="/departments" element={<DepartmentList />} />

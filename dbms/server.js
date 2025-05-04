@@ -78,6 +78,186 @@ app.get('/api/employees/:id', async (req, res) => {
   }
 });
 
+// Create new employee
+app.post('/api/employees', async (req, res) => {
+  try {
+    console.log('Received employee data:', req.body);
+    
+    const { 
+      FirstName, LastName, Email, PhoneNo, Gender, 
+      HireDate, DepartmentID, SupervisorID, Salary, Address 
+    } = req.body;
+    
+    // Format dates properly or set to null if empty
+    const formattedHireDate = HireDate ? new Date(HireDate).toISOString().slice(0, 10) : null;
+    
+    // Convert string IDs to numbers or null
+    const parsedDepartmentID = DepartmentID ? parseInt(DepartmentID, 10) : null;
+    const parsedSupervisorID = SupervisorID ? parseInt(SupervisorID, 10) : null;
+    const parsedSalary = Salary ? parseFloat(Salary) : 0;
+    
+    console.log('Processed data:', {
+      FirstName, 
+      LastName, 
+      Email, 
+      PhoneNo, 
+      Gender,
+      HireDate: formattedHireDate,
+      DepartmentID: parsedDepartmentID,
+      SupervisorID: parsedSupervisorID,
+      Salary: parsedSalary,
+      Address
+    });
+    
+    const [result] = await pool.query(
+      `INSERT INTO Employee (
+        FirstName, LastName, Email, PhoneNo, Gender, 
+        HireDate, DepartmentID, SupervisorID, Salary, Address
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        FirstName || null, 
+        LastName || null, 
+        Email || null, 
+        PhoneNo || null, 
+        Gender || 'Male',  
+        formattedHireDate, 
+        parsedDepartmentID, 
+        parsedSupervisorID, 
+        parsedSalary, 
+        Address || null
+      ]
+    );
+    
+    if (result.affectedRows) {
+      const [newEmployee] = await pool.query(
+        `SELECT 
+          e.*, 
+          d.DepartmentName,
+          CONCAT(s.FirstName, ' ', s.LastName) AS SupervisorName
+        FROM 
+          Employee e
+        LEFT JOIN 
+          Department d ON e.DepartmentID = d.DepartmentID
+        LEFT JOIN 
+          Employee s ON e.SupervisorID = s.EmployeeID
+        WHERE e.EmployeeID = ?`,
+        [result.insertId]
+      );
+      
+      res.status(201).json(newEmployee[0]);
+    } else {
+      res.status(400).json({ message: 'Failed to create employee' });
+    }
+  } catch (error) {
+    console.error('Error creating employee:', error);
+    res.status(500).json({ error: error.message, stack: error.stack });
+  }
+});
+
+// Update an employee
+app.put('/api/employees/:id', async (req, res) => {
+  try {
+    console.log('Updating employee with ID:', req.params.id);
+    console.log('Received update data:', req.body);
+    
+    const { 
+      FirstName, LastName, Email, PhoneNo, Gender, 
+      HireDate, DepartmentID, SupervisorID, Salary, Address 
+    } = req.body;
+    
+    // Format dates properly or set to null if empty
+    const formattedHireDate = HireDate ? new Date(HireDate).toISOString().slice(0, 10) : null;
+    
+    // Convert string IDs to numbers or null
+    const parsedDepartmentID = DepartmentID ? parseInt(DepartmentID, 10) : null;
+    const parsedSupervisorID = SupervisorID ? parseInt(SupervisorID, 10) : null;
+    const parsedSalary = Salary ? parseFloat(Salary) : 0;
+    
+    console.log('Processed update data:', {
+      FirstName, 
+      LastName, 
+      Email, 
+      PhoneNo, 
+      Gender,
+      HireDate: formattedHireDate,
+      DepartmentID: parsedDepartmentID,
+      SupervisorID: parsedSupervisorID,
+      Salary: parsedSalary,
+      Address
+    });
+    
+    const [result] = await pool.query(
+      `UPDATE Employee SET
+        FirstName = ?,
+        LastName = ?,
+        Email = ?,
+        PhoneNo = ?,
+        Gender = ?,
+        HireDate = ?,
+        DepartmentID = ?,
+        SupervisorID = ?,
+        Salary = ?,
+        Address = ?
+      WHERE EmployeeID = ?`,
+      [
+        FirstName || null, 
+        LastName || null, 
+        Email || null, 
+        PhoneNo || null, 
+        Gender || 'Male', 
+        formattedHireDate, 
+        parsedDepartmentID, 
+        parsedSupervisorID, 
+        parsedSalary, 
+        Address || null, 
+        req.params.id
+      ]
+    );
+    
+    if (result.affectedRows) {
+      const [updatedEmployee] = await pool.query(
+        `SELECT 
+          e.*, 
+          d.DepartmentName,
+          CONCAT(s.FirstName, ' ', s.LastName) AS SupervisorName
+        FROM 
+          Employee e
+        LEFT JOIN 
+          Department d ON e.DepartmentID = d.DepartmentID
+        LEFT JOIN 
+          Employee s ON e.SupervisorID = s.EmployeeID
+        WHERE e.EmployeeID = ?`,
+        [req.params.id]
+      );
+      
+      res.json(updatedEmployee[0]);
+    } else {
+      res.status(404).json({ message: 'Employee not found' });
+    }
+  } catch (error) {
+    console.error('Error updating employee:', error);
+    res.status(500).json({ error: error.message, stack: error.stack });
+  }
+});
+
+// Delete an employee
+app.delete('/api/employees/:id', async (req, res) => {
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM Employee WHERE EmployeeID = ?',
+      [req.params.id]
+    );
+    
+    if (result.affectedRows) {
+      res.json({ message: 'Employee deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Employee not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all departments
 app.get('/api/departments', async (req, res) => {
   try {

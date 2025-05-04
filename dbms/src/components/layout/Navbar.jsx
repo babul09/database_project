@@ -1,7 +1,157 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import services from '../../services/api';
 
 const Navbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedTerm, setDebouncedTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef(null);
+  const navigate = useNavigate();
+  
+  // Data states
+  const [employees, setEmployees] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    // Fetch data for search
+    const fetchSearchData = async () => {
+      try {
+        const [employeesRes, departmentsRes, projectsRes] = await Promise.all([
+          services.getAllEmployees(),
+          services.getAllDepartments(),
+          services.getAllProjects()
+        ]);
+        setEmployees(employeesRes.data);
+        setDepartments(departmentsRes.data);
+        setProjects(projectsRes.data);
+      } catch (error) {
+        console.error('Error fetching search data:', error);
+      }
+    };
+
+    fetchSearchData();
+  }, []);
+
+  // Implement debounce for search term
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedTerm(searchTerm);
+    }, 300); // 300ms delay
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchTerm]);
+
+  useEffect(() => {
+    // Handle clicks outside the search results
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Search logic
+    if (debouncedTerm.trim().length === 0) {
+      setSearchResults([]);
+      setShowResults(false);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const term = debouncedTerm.toLowerCase();
+    
+    // Search employees
+    const matchedEmployees = employees
+      .filter(emp => 
+        emp.FirstName?.toLowerCase().includes(term) || 
+        emp.LastName?.toLowerCase().includes(term) ||
+        emp.Email?.toLowerCase().includes(term)
+      )
+      .slice(0, 3) // Limit to 3 results per category
+      .map(emp => ({
+        id: emp.EmployeeID,
+        name: `${emp.FirstName} ${emp.LastName}`,
+        type: 'employee',
+        path: `/employees/${emp.EmployeeID}`
+      }));
+    
+    // Search departments
+    const matchedDepartments = departments
+      .filter(dept => 
+        dept.DepartmentName?.toLowerCase().includes(term)
+      )
+      .slice(0, 3)
+      .map(dept => ({
+        id: dept.DepartmentID,
+        name: dept.DepartmentName,
+        type: 'department',
+        path: `/departments` // Navigate to departments page with this dept highlighted
+      }));
+    
+    // Search projects
+    const matchedProjects = projects
+      .filter(proj => 
+        proj.ProjectName?.toLowerCase().includes(term)
+      )
+      .slice(0, 3)
+      .map(proj => ({
+        id: proj.ProjectID,
+        name: proj.ProjectName,
+        type: 'project',
+        path: `/projects` // Navigate to projects page with this project highlighted
+      }));
+    
+    // Combine all results
+    const combinedResults = [
+      ...matchedEmployees,
+      ...matchedDepartments,
+      ...matchedProjects
+    ];
+    
+    setSearchResults(combinedResults);
+    setShowResults(combinedResults.length > 0);
+    setIsSearching(false);
+  }, [debouncedTerm, employees, departments, projects]);
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+    if (e.target.value.trim() === '') {
+      setShowResults(false);
+    } else if (searchResults.length > 0) {
+      setShowResults(true);
+    }
+  };
+
+  const handleResultClick = (result) => {
+    navigate(result.path);
+    setSearchTerm('');
+    setShowResults(false);
+  };
+  
+  // Handle keyboard navigation in search results
+  const handleKeyDown = (e) => {
+    if (!showResults || searchResults.length === 0) return;
+    
+    if (e.key === 'Escape') {
+      setShowResults(false);
+    } else if (e.key === 'Enter' && searchResults.length > 0) {
+      handleResultClick(searchResults[0]); // Select first result on Enter
+    }
+  };
   
   return (
     <div className="bg-white shadow-md px-6 py-3 flex justify-between items-center">
@@ -11,11 +161,19 @@ const Navbar = () => {
       
       <div className="flex items-center space-x-4">
         {/* Search bar */}
-        <div className="relative">
+        <div className="relative" ref={searchRef}>
           <input
             type="text"
             placeholder="Search..."
             className="bg-gray-100 rounded-full py-2 px-4 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-64"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            onKeyDown={handleKeyDown}
+            onFocus={() => {
+              if (searchResults.length > 0) {
+                setShowResults(true);
+              }
+            }}
           />
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -31,6 +189,39 @@ const Navbar = () => {
               d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
             />
           </svg>
+          
+          {/* Search Results Dropdown */}
+          {showResults && (
+            <div className="absolute mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
+              <div className="py-1">
+                {isSearching ? (
+                  <div className="px-4 py-2 text-sm text-gray-500">Searching...</div>
+                ) : searchResults.length > 0 ? (
+                  <>
+                    {searchResults.map((result) => (
+                      <button
+                        key={`${result.type}-${result.id}`}
+                        onClick={() => handleResultClick(result)}
+                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                      >
+                        <div className="font-medium">{result.name}</div>
+                        <div className="text-xs text-gray-500 capitalize">
+                          {result.type}
+                        </div>
+                      </button>
+                    ))}
+                    {searchResults.length > 8 && (
+                      <div className="px-4 py-2 text-xs text-gray-500 border-t">
+                        Showing top results. Type more to refine.
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="px-4 py-2 text-sm text-gray-500">No results found</div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         
         {/* Notification bell */}
