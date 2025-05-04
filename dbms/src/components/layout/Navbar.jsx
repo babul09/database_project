@@ -1,6 +1,12 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import services from '../../services/api';
+import { motion } from 'framer-motion';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
+import { Card, CardContent } from '../ui/card';
+import { Badge } from '../ui/badge';
+import { Search, Bell, User, ChevronDown } from 'lucide-react';
 
 const Navbar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -154,123 +160,155 @@ const Navbar = () => {
   };
   
   return (
-    <div className="bg-white shadow-md px-6 py-3 flex justify-between items-center">
-      <div className="flex items-center">
-        <h1 className="text-xl font-semibold text-gray-800">Employee Management System</h1>
-      </div>
+    <motion.div 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="bg-card shadow-md px-6 py-3 flex justify-between items-center border-b border-border/40"
+    >
+      <motion.div 
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="flex items-center"
+      >
+        <h1 className="text-xl font-semibold text-card-foreground">Employee Management System</h1>
+      </motion.div>
       
       <div className="flex items-center space-x-4">
         {/* Search bar */}
         <div className="relative" ref={searchRef}>
-          <input
-            type="text"
-            placeholder="Search..."
-            className="bg-gray-100 rounded-full py-2 px-4 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-64"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            onKeyDown={handleKeyDown}
-            onFocus={() => {
-              if (searchResults.length > 0) {
-                setShowResults(true);
-              }
-            }}
-          />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-gray-400 absolute left-3 top-2.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          <div className="relative">
+            <Search className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search..."
+              className="w-64 pl-10 bg-muted border-muted focus:bg-card transition-colors"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => {
+                if (searchResults.length > 0) {
+                  setShowResults(true);
+                }
+              }}
             />
-          </svg>
+          </div>
           
           {/* Search Results Dropdown */}
           {showResults && (
-            <div className="absolute mt-1 w-full bg-white rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
-              <div className="py-1">
-                {isSearching ? (
-                  <div className="px-4 py-2 text-sm text-gray-500">Searching...</div>
-                ) : searchResults.length > 0 ? (
-                  <>
-                    {searchResults.map((result) => (
-                      <button
-                        key={`${result.type}-${result.id}`}
-                        onClick={() => handleResultClick(result)}
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                      >
-                        <div className="font-medium">{result.name}</div>
-                        <div className="text-xs text-gray-500 capitalize">
-                          {result.type}
+            <motion.div 
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="absolute mt-1 w-full z-50"
+            >
+              <Card className="border border-border/60 shadow-lg shadow-black/20">
+                <CardContent className="p-2">
+                  {isSearching ? (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">Searching...</div>
+                  ) : searchResults.length > 0 ? (
+                    <>
+                      {searchResults.map((result) => (
+                        <motion.button
+                          key={`${result.type}-${result.id}`}
+                          onClick={() => handleResultClick(result)}
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-accent rounded-md my-1"
+                          whileHover={{ scale: 1.02 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <div className="font-medium">{result.name}</div>
+                          <div className="text-xs text-muted-foreground flex items-center">
+                            <Badge variant="secondary" className="mt-1 capitalize">
+                              {result.type}
+                            </Badge>
+                          </div>
+                        </motion.button>
+                      ))}
+                      {searchResults.length > 8 && (
+                        <div className="px-4 py-2 text-xs text-muted-foreground border-t border-border/40">
+                          Showing top results. Type more to refine.
                         </div>
-                      </button>
-                    ))}
-                    {searchResults.length > 8 && (
-                      <div className="px-4 py-2 text-xs text-gray-500 border-t">
-                        Showing top results. Type more to refine.
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="px-4 py-2 text-sm text-gray-500">No results found</div>
-                )}
-              </div>
-            </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="px-4 py-2 text-sm text-muted-foreground">No results found</div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
         </div>
         
         {/* Notification bell */}
-        <button className="text-gray-500 hover:text-gray-700">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-            />
-          </svg>
-        </button>
+        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-accent">
+            <Bell className="h-5 w-5" />
+          </Button>
+        </motion.div>
         
         {/* Profile dropdown */}
         <div className="relative">
-          <button
-            onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center space-x-2 focus:outline-none"
-          >
-            <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
-              BB
-            </div>
-            <span className="text-gray-700">Babul Bishwas</span>
-          </button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              variant="ghost"
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className="flex items-center space-x-2 hover:bg-accent"
+            >
+              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+                <User className="h-4 w-4" />
+              </div>
+              <span className="hidden md:block">John Doe</span>
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </motion.div>
           
           {isProfileOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                Profile
-              </a>
-              <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                Settings
-              </a>
-              <hr className="my-1" />
-              <a href="#" className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
-                Logout
-              </a>
-            </div>
+            <motion.div 
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="absolute right-0 mt-2 w-48 z-50"
+            >
+              <Card className="border border-border/60 shadow-lg shadow-black/20">
+                <CardContent className="p-2">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-accent rounded-md my-1"
+                    onClick={() => {
+                      navigate('/profile');
+                      setIsProfileOpen(false);
+                    }}
+                  >
+                    Profile
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-accent rounded-md my-1"
+                    onClick={() => {
+                      navigate('/settings');
+                      setIsProfileOpen(false);
+                    }}
+                  >
+                    Settings
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-accent rounded-md my-1 text-destructive"
+                    onClick={() => {
+                      // Handle logout
+                      setIsProfileOpen(false);
+                    }}
+                  >
+                    Logout
+                  </motion.button>
+                </CardContent>
+              </Card>
+            </motion.div>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
