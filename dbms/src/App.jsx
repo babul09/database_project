@@ -15,6 +15,18 @@ import DepartmentList from './components/departments/DepartmentList';
 // Projects
 import ProjectList from './components/projects/ProjectList';
 
+// Time Tracking
+import TimeTrackingList from './components/timetracking/TimeTrackingList';
+import TimeTrackingPage from './components/timetracking/TimeTrackingPage';
+
+// Leave Management
+import LeavesList from './components/leaves/LeavesList';
+import LeavesPage from './components/leaves/LeavesPage';
+
+// Benefits
+import BenefitsList from './components/benefits/BenefitsList';
+import BenefitsPage from './components/benefits/BenefitsPage';
+
 function App() {
   return (
     <Router>
@@ -34,6 +46,20 @@ function App() {
           
           {/* Projects */}
           <Route path="/projects" element={<ProjectList />} />
+          
+          {/* Time Tracking - Employee Specific */}
+          <Route path="/employees/:id/timetracking" element={<TimeTrackingList />} />
+          
+          {/* Leave Management - Employee Specific */}
+          <Route path="/employees/:id/leaves" element={<LeavesList />} />
+          
+          {/* Benefits - Employee Specific */}
+          <Route path="/employees/:id/benefits" element={<BenefitsList />} />
+          
+          {/* Standalone Pages */}
+          <Route path="/timetracking" element={<TimeTrackingPage />} />
+          <Route path="/leaves" element={<LeavesPage />} />
+          <Route path="/benefits" element={<BenefitsPage />} />
           
           {/* 404 Page */}
           <Route path="*" element={

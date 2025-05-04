@@ -249,9 +249,9 @@ const Navbar = () => {
             className="flex items-center space-x-2 focus:outline-none"
           >
             <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
-              BR
+              BB
             </div>
-            <span className="text-gray-700">Babul Rahman</span>
+            <span className="text-gray-700">Babul Bishwas</span>
           </button>
           
           {isProfileOpen && (

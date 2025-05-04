@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import services from '../../services/api';
 
 const EmployeeDetail = () => {
@@ -9,7 +9,7 @@ const EmployeeDetail = () => {
   const [leaves, setLeaves] = useState([]);
   const [benefits, setBenefits] = useState([]);
   const [dependents, setDependents] = useState([]);
-  const [timeTracking, setTimeTracking] = useState([]);
+  const [timeEntries, setTimeEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -40,7 +40,7 @@ const EmployeeDetail = () => {
         
         // Fetch employee time tracking
         const timeTrackingResponse = await services.getEmployeeTimeTracking(id);
-        setTimeTracking(timeTrackingResponse.data);
+        setTimeEntries(timeTrackingResponse.data);
         
         setLoading(false);
       } catch (error) {
@@ -298,7 +298,10 @@ const EmployeeDetail = () => {
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Leave Records ({leaves.length})</h3>
-              <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">Request Leave</button>
+              <div className="space-x-2">
+                <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">Request Leave</button>
+                <Link to={`/employees/${id}/leaves`} className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm">View Detailed Report</Link>
+              </div>
             </div>
             {leaves.length > 0 ? (
               <div className="overflow-x-auto">
@@ -362,7 +365,10 @@ const EmployeeDetail = () => {
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Benefits ({benefits.length})</h3>
-              <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">Add Benefit</button>
+              <div className="space-x-2">
+                <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">Add Benefit</button>
+                <Link to={`/employees/${id}/benefits`} className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm">View Detailed Report</Link>
+              </div>
             </div>
             {benefits.length > 0 ? (
               <div className="overflow-x-auto">
@@ -453,10 +459,13 @@ const EmployeeDetail = () => {
         {activeTab === 'timeTracking' && (
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Time Tracking ({timeTracking.length} entries)</h3>
-              <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">Log Time</button>
+              <h3 className="text-lg font-semibold">Time Tracking ({timeEntries.length})</h3>
+              <div className="space-x-2">
+                <button className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm">Log Time</button>
+                <Link to={`/employees/${id}/timetracking`} className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded text-sm">View Detailed Report</Link>
+              </div>
             </div>
-            {timeTracking.length > 0 ? (
+            {timeEntries.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -467,7 +476,7 @@ const EmployeeDetail = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {timeTracking.map(entry => (
+                    {timeEntries.map(entry => (
                       <tr key={entry.ID}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {formatDate(entry.Date)}
