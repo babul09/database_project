@@ -96,7 +96,12 @@ app.post('/api/employees', async (req, res) => {
     const parsedSupervisorID = SupervisorID ? parseInt(SupervisorID, 10) : null;
     const parsedSalary = Salary ? parseFloat(Salary) : 0;
     
+    // Generate new EmployeeID by getting the max existing ID and adding 1
+    const [maxIdResult] = await pool.query('SELECT MAX(EmployeeID) as maxId FROM Employee');
+    const newEmployeeId = maxIdResult[0].maxId + 1;
+    
     console.log('Processed data:', {
+      EmployeeID: newEmployeeId,
       FirstName, 
       LastName, 
       Email, 
@@ -111,10 +116,11 @@ app.post('/api/employees', async (req, res) => {
     
     const [result] = await pool.query(
       `INSERT INTO Employee (
-        FirstName, LastName, Email, PhoneNo, Gender, 
+        EmployeeID, FirstName, LastName, Email, PhoneNo, Gender, 
         HireDate, DepartmentID, SupervisorID, Salary, Address
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
+        newEmployeeId,
         FirstName || null, 
         LastName || null, 
         Email || null, 
@@ -141,7 +147,7 @@ app.post('/api/employees', async (req, res) => {
         LEFT JOIN 
           Employee s ON e.SupervisorID = s.EmployeeID
         WHERE e.EmployeeID = ?`,
-        [result.insertId]
+        [newEmployeeId]
       );
       
       res.status(201).json(newEmployee[0]);
