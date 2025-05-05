@@ -6,9 +6,11 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Card, CardContent } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { Search, Bell, User, ChevronDown } from 'lucide-react';
+import { Search, Bell, User, ChevronDown, LogOut } from 'lucide-react';
+import { useAuth } from '../auth/AuthContext';
 
 const Navbar = () => {
+  const { currentUser, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedTerm, setDebouncedTerm] = useState('');
@@ -16,6 +18,7 @@ const Navbar = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef(null);
+  const profileRef = useRef(null);
   const navigate = useNavigate();
   
   // Data states
@@ -59,6 +62,9 @@ const Navbar = () => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowResults(false);
+      }
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
       }
     };
 
@@ -158,6 +164,11 @@ const Navbar = () => {
       handleResultClick(searchResults[0]); // Select first result on Enter
     }
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   
   return (
     <motion.div 
@@ -198,41 +209,36 @@ const Navbar = () => {
           {/* Search Results Dropdown */}
           {showResults && (
             <motion.div 
-              initial={{ y: 10, opacity: 0 }}
+              initial={{ y: -10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.2 }}
-              className="absolute mt-1 w-full z-50"
+              className="absolute z-50 mt-1 w-full bg-card rounded-md shadow-lg border border-border overflow-hidden"
             >
-              <Card className="border border-border/60 shadow-lg shadow-black/20">
-                <CardContent className="p-2">
+              <Card>
+                <CardContent className="p-0">
                   {isSearching ? (
-                    <div className="px-4 py-2 text-sm text-muted-foreground">Searching...</div>
-                  ) : searchResults.length > 0 ? (
-                    <>
+                    <div className="px-4 py-3 text-sm text-muted-foreground">Searching...</div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="px-4 py-3 text-sm text-muted-foreground">No results found</div>
+                  ) : (
+                    <ul className="max-h-72 overflow-auto">
                       {searchResults.map((result) => (
-                        <motion.button
-                          key={`${result.type}-${result.id}`}
-                          onClick={() => handleResultClick(result)}
-                          className="block w-full text-left px-4 py-2 text-sm hover:bg-accent rounded-md my-1"
-                          whileHover={{ scale: 1.02 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <div className="font-medium">{result.name}</div>
-                          <div className="text-xs text-muted-foreground flex items-center">
-                            <Badge variant="secondary" className="mt-1 capitalize">
+                        <li key={`${result.type}-${result.id}`} className="border-b border-border last:border-0">
+                          <button
+                            className="w-full px-4 py-2 hover:bg-accent text-left flex items-center justify-between transition-colors"
+                            onClick={() => handleResultClick(result)}
+                          >
+                            <div>
+                              <div className="font-medium text-card-foreground">{result.name}</div>
+                              <div className="text-xs text-muted-foreground capitalize">{result.type}</div>
+                            </div>
+                            <Badge variant="outline" className="capitalize">
                               {result.type}
                             </Badge>
-                          </div>
-                        </motion.button>
+                          </button>
+                        </li>
                       ))}
-                      {searchResults.length > 8 && (
-                        <div className="px-4 py-2 text-xs text-muted-foreground border-t border-border/40">
-                          Showing top results. Type more to refine.
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="px-4 py-2 text-sm text-muted-foreground">No results found</div>
+                    </ul>
                   )}
                 </CardContent>
               </Card>
@@ -240,68 +246,52 @@ const Navbar = () => {
           )}
         </div>
         
-        {/* Notification bell */}
-        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-          <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary hover:bg-accent">
-            <Bell className="h-5 w-5" />
-          </Button>
-        </motion.div>
+        {/* Notifications */}
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
+          <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-primary"></span>
+        </Button>
         
         {/* Profile dropdown */}
-        <div className="relative">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button
-              variant="ghost"
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center space-x-2 hover:bg-accent"
-            >
-              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                <User className="h-4 w-4" />
-              </div>
-              <span className="hidden md:block">John Doe</span>
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </motion.div>
+        <div className="relative" ref={profileRef}>
+          <Button
+            variant="ghost"
+            className="flex items-center space-x-2"
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+          >
+            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <User className="h-4 w-4 text-primary" />
+            </div>
+            <span className="font-medium">{currentUser?.name || 'User'}</span>
+            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          </Button>
           
           {isProfileOpen && (
-            <motion.div 
-              initial={{ y: 10, opacity: 0 }}
+            <motion.div
+              initial={{ y: -10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.2 }}
-              className="absolute right-0 mt-2 w-48 z-50"
+              className="absolute right-0 mt-2 w-56 bg-card rounded-md shadow-lg border border-border z-50"
             >
-              <Card className="border border-border/60 shadow-lg shadow-black/20">
+              <Card>
                 <CardContent className="p-2">
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-accent rounded-md my-1"
-                    onClick={() => {
-                      navigate('/profile');
-                      setIsProfileOpen(false);
-                    }}
-                  >
-                    Profile
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-accent rounded-md my-1"
-                    onClick={() => {
-                      navigate('/settings');
-                      setIsProfileOpen(false);
-                    }}
-                  >
-                    Settings
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-accent rounded-md my-1 text-destructive"
-                    onClick={() => {
-                      // Handle logout
-                      setIsProfileOpen(false);
-                    }}
-                  >
-                    Logout
-                  </motion.button>
+                  <div className="px-3 py-2">
+                    <p className="text-sm font-medium">{currentUser?.name || 'User'}</p>
+                    <p className="text-xs text-muted-foreground">{currentUser?.email || 'user@example.com'}</p>
+                    <p className="text-xs font-medium mt-1 text-primary capitalize">
+                      {currentUser?.role || 'User'}
+                    </p>
+                  </div>
+                  <div className="border-t border-border mt-2 pt-2">
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
