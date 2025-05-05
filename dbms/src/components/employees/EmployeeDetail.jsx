@@ -32,6 +32,11 @@ const EmployeeDetail = () => {
         
         // Fetch employee benefits
         const benefitsResponse = await services.getEmployeeBenefits(id);
+        console.log('Benefits data:', benefitsResponse.data);
+        // Log each benefit premium type
+        benefitsResponse.data.forEach(benefit => {
+          console.log(`Benefit ID: ${benefit.BenefitID}, Premium: ${benefit.Premium}, Type: ${typeof benefit.Premium}`);
+        });
         setBenefits(benefitsResponse.data);
         
         // Fetch employee dependents
@@ -77,6 +82,25 @@ const EmployeeDetail = () => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  // Format currency function with robust error handling
+  const formatCurrency = (value) => {
+    // If it's already a number, format it
+    if (typeof value === 'number') {
+      return value.toFixed(2);
+    }
+    
+    // If it's a string, try to convert it to a number
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      if (!isNaN(parsed)) {
+        return parsed.toFixed(2);
+      }
+    }
+    
+    // Default fallback
+    return '0.00';
   };
 
   return (
@@ -398,7 +422,7 @@ const EmployeeDetail = () => {
                           {benefit.Coverage}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          ${benefit.Premium.toFixed(2)}
+                          ${formatCurrency(benefit.Premium)}
                         </td>
                       </tr>
                     ))}

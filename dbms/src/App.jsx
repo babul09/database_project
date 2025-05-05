@@ -17,6 +17,7 @@ import EmployeeForm from './components/employees/EmployeeForm';
 
 // Departments
 import DepartmentList from './components/departments/DepartmentList';
+import DepartmentDetail from './components/departments/DepartmentDetail';
 
 // Projects
 import ProjectList from './components/projects/ProjectList';
@@ -89,6 +90,13 @@ function App() {
             <ProtectedRoute>
               <Layout>
                 <DepartmentList />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/departments/:id" element={
+            <ProtectedRoute>
+              <Layout>
+                <DepartmentDetail />
               </Layout>
             </ProtectedRoute>
           } />

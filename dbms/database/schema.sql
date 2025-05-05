@@ -331,4 +331,39 @@ BEGIN
     IF pending_count >= 3 THEN
         SIGNAL SQLSTATE '45000'
         SET MESSAGE_TEXT = 'Employee has too many pending leave requests.';
- 
+    END IF;
+END //
+
+-- Create trigger to automatically mark projects as completed when end date is passed
+CREATE TRIGGER AutoCompleteProject BEFORE UPDATE ON Project
+FOR EACH ROW
+BEGIN
+    IF NEW.Status != 'Completed' AND NEW.EndDate < CURDATE() THEN
+        SET NEW.Status = 'Completed';
+    END IF;
+END //
+
+-- Create trigger to set default HireDate to current date if NULL and validate future dates
+CREATE TRIGGER SetDefaultHireDate BEFORE INSERT ON Employee
+FOR EACH ROW
+BEGIN
+    IF NEW.HireDate IS NULL THEN
+        SET NEW.HireDate = CURDATE();
+    ELSEIF NEW.HireDate > CURDATE() THEN
+        -- Prevent future hire dates
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Hire date cannot be in the future';
+    END IF;
+END //
+
+-- Create trigger to validate employee salary
+CREATE TRIGGER ValidateEmployeeSalary BEFORE INSERT ON Employee
+FOR EACH ROW
+BEGIN
+    IF NEW.Salary <= 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Employee salary must be greater than zero';
+    END IF;
+END //
+
+DELIMITER ; 

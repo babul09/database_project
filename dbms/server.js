@@ -274,6 +274,24 @@ app.get('/api/departments', async (req, res) => {
   }
 });
 
+// Get department by ID
+app.get('/api/departments/:id', async (req, res) => {
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM Department WHERE DepartmentID = ?',
+      [req.params.id]
+    );
+    
+    if (rows.length > 0) {
+      res.json(rows[0]);
+    } else {
+      res.status(404).json({ message: 'Department not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get all projects
 app.get('/api/projects', async (req, res) => {
   try {

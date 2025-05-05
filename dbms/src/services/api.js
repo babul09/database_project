@@ -24,6 +24,7 @@ export const services = {
   
   // Departments
   getAllDepartments: () => apiClient.get('/departments'),
+  getDepartmentById: (id) => apiClient.get(`/departments/${id}`),
   
   // Projects
   getAllProjects: () => apiClient.get('/projects'),
